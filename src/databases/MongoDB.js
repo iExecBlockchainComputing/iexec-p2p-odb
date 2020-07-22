@@ -1,12 +1,12 @@
-const Module      = require('./common/Module')
-const MongoClient = require('mongodb').MongoClient;
+const { MongoClient } = require('mongodb');
+const withDebug = require('../utils/withDebug')
 
-class MongoDB extends Module
+class MongoDB
 {
-	constructor(parent, params = {})
+	constructor(url)
 	{
-		super(parent, params)
-		this.client = new MongoClient(`mongodb://${params.url}`, { useUnifiedTopology: true })
+		this.client = new MongoClient(`mongodb://${url}`, { useUnifiedTopology: true })
+		this.debug  = withDebug(this)
 	}
 
 	async start()
@@ -41,4 +41,4 @@ class MongoDB extends Module
 	}
 }
 
-module.exports  = MongoDB
+module.exports = MongoDB

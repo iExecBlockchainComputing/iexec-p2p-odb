@@ -1,38 +1,108 @@
-const Core       = require('./src/Core')
-const { ethers } = require('ethers')
+const express                         = require('express')
+const bodyParser                      = require('body-parser')
+const DHT                             = require('./src/DHT')
+const { IexecInterface, hash, clean } = require('./src/iexec')
+const { MongoDB, MemoryDB }           = require('./src/databases')
+const { ethers }                      = require('ethers')
 
-const Interactions = require('./src/modules/Interactions')
-const Listener     = require('./src/modules/Listener')
-const MemoryDB     = require('./src/modules/MemoryDB')
-const MongoDB      = require('./src/modules/MongoDB')
+
+// process.eng.MONGO = 'localhost:27017'
+
 
 async function main()
 {
-	const instance = await Core.create({
-		modules: {
-			interactions: { type: Interactions                                                       },
-			listener:     { type: Listener,                               chains: [ 1, 3, 4, 5, 42 ] },
-			database:     { type: process.env.MONGO ? MongoDB : MemoryDB, url:    'localhost:27017'  },
+	// iExec blockchain interface
+	const iexecinterface = new IexecInterface()
+
+	// DHT
+	const dht = await DHT.create({
+		topic: '/iexec/odb/5.0.0',
+		database: (process.env.MONGO && new MongoDB(process.env.MONGO)) || (process.env.MEMORY && new MemoryDB()),
+		methods:
+		{
+			hash: (value) => hash(value.domain, value.order),
+			isValid: (value) => iexecinterface.isValidOrder(value.domain, value.order),
 		}
 	})
+
+	// start listenning to blockchain events
+	process.env.LISTEN && await iexecinterface.startListener({
+		handleBroadcast:
+			async (domain, order) => {
+				iexecinterface.debug('handleBroadcast')
+				await dht.new({ domain, order: clean(order) })
+			},
+
+		handleClose:
+			async (hash) => {
+				iexecinterface.debug('handleClose')
+				await this.dht.update(hash)
+			},
+
+		handleMatch:
+			async (dealid, appHash, datasetHash, workerpoolHash, requestHash, volume) => {
+				iexecinterface.debug('handleMatch')
+				await this.dht.update(appHash)
+				await this.dht.update(datasetHash)
+				await this.dht.update(workerpoolHash)
+				await this.dht.update(requestHash)
+			},
+	})
+
+
+	const app = express()
+	app.use(bodyParser.json())
+	app.use(bodyParser.urlencoded({ extended: true }))
+
+	app.route('/order/:hash?')
+	.get(async (req, res) => {
+		const result = await dht.database.get(req.params.hash)
+		result
+			? res.json({ result })
+			: res.json({ error: 'no entry found' })
+	})
+	.post(async (req, res) => {
+		try
+		{
+			await dht.new({
+				domain: clean(req.body.domain),
+				order:  clean(req.body.order),
+			})
+			res.json({ result: true })
+		}
+		catch (error)
+		{
+			res.json({ error: error.message })
+		}
+	})
+
+	process.env.PORT && app.listen(process.env.PORT)
+
+
+
+
+
 
 	process.stdin.on('data', async (message) => {
 		try
 		{
-			instance.modules.interactions.pushOrder({
-				name:              'iExecODB',
-				version:           '5.0.0',
-				chainId:           1,
-				verifyingContract: '0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f',
-			},{
-				dataset:            ethers.constants.AddressZero,
-				datasetprice:       0,
-				volume:             1,
-				tag:                ethers.constants.HashZero,
-				apprestrict:        ethers.constants.AddressZero,
-				workerpoolrestrict: ethers.constants.AddressZero,
-				requesterrestrict:  ethers.constants.AddressZero,
-				salt:               ethers.utils.hexlify(ethers.utils.randomBytes(32)),
+			dht.new({
+				domain: {
+					name:              'iExecODB',
+					version:           '5.0.0',
+					chainId:           1,
+					verifyingContract: '0x3eca1B216A7DF1C7689aEb259fFB83ADFB894E7f',
+				},
+				order: {
+					dataset:            ethers.constants.AddressZero,
+					datasetprice:       0,
+					volume:             1,
+					tag:                ethers.constants.HashZero,
+					apprestrict:        ethers.constants.AddressZero,
+					workerpoolrestrict: ethers.constants.AddressZero,
+					requesterrestrict:  ethers.constants.AddressZero,
+					salt:               ethers.utils.hexlify(ethers.utils.randomBytes(32)),
+				}
 			})
 		}
 		catch (err)
@@ -40,6 +110,8 @@ async function main()
 			console.error(err)
 		}
 	})
+
 }
 
-main()
+
+main().catch(console.error)

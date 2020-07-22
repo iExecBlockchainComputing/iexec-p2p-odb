@@ -6,7 +6,7 @@
 	"license": "MIT",
 	"main": "index.js",
 	"scripts": {
-		"start": "DEBUG=iexec-p2p-odb:* node index.js"
+		"start": "DEBUG=iexec-p2p-odb:* MEMORY=1 node index.js"
 	},
 	"repository": {
 		"type": "git",
@@ -20,6 +20,7 @@
 		"chalk": "^4.1.0",
 		"eth-sig-util": "^2.5.3",
 		"ethers": "^5.0.7",
+		"express": "^4.17.1",
 		"libp2p": "^0.28.8",
 		"libp2p-bootstrap": "^0.11.0",
 		"libp2p-gossipsub": "^0.4.6",

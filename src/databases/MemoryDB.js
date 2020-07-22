@@ -1,11 +1,11 @@
-const Module = require('./common/Module')
+const withDebug = require('../utils/withDebug')
 
-class MemoryDB extends Module
+class MemoryDB
 {
-	constructor(parent, params = {})
+	constructor()
 	{
-		super(parent, params)
 		this.data  = new Map()
+		this.debug = withDebug(this)
 	}
 
 	async start()

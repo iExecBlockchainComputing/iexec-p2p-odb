@@ -1,6 +1,5 @@
 const sigUtil    = require('eth-sig-util')
 const { ethers } = require('ethers')
-const { Order }  = require('./types')
 
 const TYPES =
 {
@@ -77,25 +76,16 @@ const TYPES =
 	],
 }
 
-const TYPENAMES = {
-	[Order.Type.DOMAIN]:          'EIP712Domain',
-	[Order.Type.APPORDER]:        'AppOrder',
-	[Order.Type.DATASETORDER]:    'DatasetOrder',
-	[Order.Type.WORKERPOOLORDER]: 'WorkerpoolOrder',
-	[Order.Type.REQUESTORDER]:    'RequestOrder',
-}
-
 const type = (order) =>
 {
 	const keys = Object.keys(order)
-	if (   TYPES.EIP712Domain.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.DOMAIN
-	if (       TYPES.AppOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.APPORDER
-	if (   TYPES.DatasetOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.DATASETORDER
-	if (TYPES.WorkerpoolOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.WORKERPOOLORDER
-	if (   TYPES.RequestOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.REQUESTORDER
-	throw Error('unkown struct')
+	if (   TYPES.EIP712Domain.every(({ name }) => keys.indexOf(name) !== -1)) return 'EIP712Domain'
+	if (       TYPES.AppOrder.every(({ name }) => keys.indexOf(name) !== -1)) return 'AppOrder'
+	if (   TYPES.DatasetOrder.every(({ name }) => keys.indexOf(name) !== -1)) return 'DatasetOrder'
+	if (TYPES.WorkerpoolOrder.every(({ name }) => keys.indexOf(name) !== -1)) return 'WorkerpoolOrder'
+	if (   TYPES.RequestOrder.every(({ name }) => keys.indexOf(name) !== -1)) return 'RequestOrder'
+	throw Error('Unkown order type')
 }
-
 
 const format = (value, type) =>
 {
@@ -105,7 +95,7 @@ const format = (value, type) =>
 const clean = (order) =>
 {
 	return [
-		...TYPES[TYPENAMES[type(order)]],
+		...TYPES[type(order)],
 		{ name: 'sign', type: 'bytes' },
 	].reduce((acc, { name, type }) => ({
 		...acc,
@@ -117,7 +107,7 @@ const hash = (domain, message) =>
 {
 	return ethers.utils.hexlify(sigUtil.TypedDataUtils.sign({
 		types: TYPES,
-		primaryType: TYPENAMES[type(message)],
+		primaryType: type(message),
 		message,
 		domain,
 	}))
