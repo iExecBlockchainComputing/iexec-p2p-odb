@@ -1,13 +1,8 @@
-const express                         = require('express')
-const bodyParser                      = require('body-parser')
+const API                             = require('./src/API')
 const DHT                             = require('./src/DHT')
 const { IexecInterface, hash, clean } = require('./src/iexec')
 const { MongoDB, MemoryDB }           = require('./src/databases')
 const { ethers }                      = require('ethers')
-
-
-// process.eng.MONGO = 'localhost:27017'
-
 
 async function main()
 {
@@ -17,13 +12,16 @@ async function main()
 	// DHT
 	const dht = await DHT.create({
 		topic: '/iexec/odb/5.0.0',
-		database: (process.env.MONGO && new MongoDB(process.env.MONGO)) || (process.env.MEMORY && new MemoryDB()),
+		database: (process.env.MONGO && new MongoDB({ url: process.env.MONGO, db: 'iExec-P2P-ODB', collection: 'orders' })) || (process.env.MEMORY && new MemoryDB()),
 		methods:
 		{
 			hash: (value) => hash(value.domain, value.order),
 			isValid: (value) => iexecinterface.isValidOrder(value.domain, value.order),
 		}
 	})
+
+	// RestAPI
+	const api = await API.create(dht, process.env.PORT)
 
 	// start listenning to blockchain events
 	process.env.LISTEN && await iexecinterface.startListener({
@@ -48,39 +46,6 @@ async function main()
 				await this.dht.update(requestHash)
 			},
 	})
-
-
-	const app = express()
-	app.use(bodyParser.json())
-	app.use(bodyParser.urlencoded({ extended: true }))
-
-	app.route('/order/:hash?')
-	.get(async (req, res) => {
-		const result = await dht.database.get(req.params.hash)
-		result
-			? res.json({ result })
-			: res.json({ error: 'no entry found' })
-	})
-	.post(async (req, res) => {
-		try
-		{
-			await dht.new({
-				domain: clean(req.body.domain),
-				order:  clean(req.body.order),
-			})
-			res.json({ result: true })
-		}
-		catch (error)
-		{
-			res.json({ error: error.message })
-		}
-	})
-
-	process.env.PORT && app.listen(process.env.PORT)
-
-
-
-
 
 
 	process.stdin.on('data', async (message) => {
@@ -110,7 +75,6 @@ async function main()
 			console.error(err)
 		}
 	})
-
 }
 
 

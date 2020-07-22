@@ -3,17 +3,19 @@ const withDebug = require('../utils/withDebug')
 
 class MongoDB
 {
-	constructor(url)
+	constructor(options = {})
 	{
-		this.client = new MongoClient(`mongodb://${url}`, { useUnifiedTopology: true })
-		this.debug  = withDebug(this)
+		this.client     = new MongoClient(`mongodb://${options.url}`, { useUnifiedTopology: true })
+		this.db         = options.db
+		this.collection = options.collection
+		this.debug      = withDebug(this)
 	}
 
 	async start()
 	{
 		this.debug(`start`)
 		await this.client.connect()
-		this.data = this.client.db('iExec-P2P-ODB').collection('orders')
+		this.data = this.client.db(this.db).collection(this.collection)
 	}
 
 	async stop()

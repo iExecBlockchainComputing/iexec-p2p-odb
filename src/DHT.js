@@ -1,7 +1,6 @@
 const Libp2p       = require('libp2p')
 const peerId       = require('peer-id')
 const defaultsDeep = require('@nodeutils/defaults-deep')
-
 const { Request }  = require('./utils/request')
 const withDebug    = require('./utils/withDebug')
 const SETTINGS     = require('./libp2p-settings')
@@ -35,7 +34,7 @@ class DHT extends Libp2p
 
 	async start()
 	{
-		this.debug('start')
+		this.debug(`start`)
 		await super.start()
 		this.database && await this.database.start()
 
@@ -84,7 +83,7 @@ class DHT extends Libp2p
 
 	async stop()
 	{
-		this.debug('stop')
+		this.debug(`stop`)
 		this.pubsub.unsubscribe(this.topic)
 		this.database && await this.database.stop()
 		await super.stop()
