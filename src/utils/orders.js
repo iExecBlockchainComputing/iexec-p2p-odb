@@ -1,5 +1,6 @@
-const sigUtil   = require('eth-sig-util')
-const { Order } = require('./types')
+const sigUtil    = require('eth-sig-util')
+const { ethers } = require('ethers')
+const { Order }  = require('./types')
 
 const TYPES =
 {
@@ -77,33 +78,51 @@ const TYPES =
 }
 
 const TYPENAMES = {
-	[Order.Type.APP_ORDER]:        'AppOrder',
-	[Order.Type.DATASET_ORDER]:    'DatasetOrder',
-	[Order.Type.WORKERPOOL_ORDER]: 'WorkerpoolOrder',
-	[Order.Type.REQUEST_ORDER]:    'RequestOrder',
+	[Order.Type.DOMAIN]:          'EIP712Domain',
+	[Order.Type.APPORDER]:        'AppOrder',
+	[Order.Type.DATASETORDER]:    'DatasetOrder',
+	[Order.Type.WORKERPOOLORDER]: 'WorkerpoolOrder',
+	[Order.Type.REQUESTORDER]:    'RequestOrder',
 }
 
 const type = (order) =>
 {
 	const keys = Object.keys(order)
-	if (       TYPES.AppOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.APP_ORDER
-	if (   TYPES.DatasetOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.DATASET_ORDER
-	if (TYPES.WorkerpoolOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.WORKERPOOL_ORDER
-	if (   TYPES.RequestOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.REQUEST_ORDER
+	if (   TYPES.EIP712Domain.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.DOMAIN
+	if (       TYPES.AppOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.APPORDER
+	if (   TYPES.DatasetOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.DATASETORDER
+	if (TYPES.WorkerpoolOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.WORKERPOOLORDER
+	if (   TYPES.RequestOrder.every(({ name }) => keys.indexOf(name) !== -1)) return Order.Type.REQUESTORDER
 	throw Error('unkown struct')
 }
 
-const hash = (type, domain, message) =>
+
+const format = (value, type) =>
 {
-	return sigUtil.TypedDataUtils.sign({
-		types: TYPES,
-		primaryType: TYPENAMES[type],
-		message,
-		domain,
-	})
+	return ethers.BigNumber.isBigNumber(value) ? value.toString() : value
 }
 
+const clean = (order) =>
+{
+	return [
+		...TYPES[TYPENAMES[type(order)]],
+		{ name: 'sign', type: 'bytes' },
+	].reduce((acc, { name, type }) => ({
+		...acc,
+		[name]: format(order[name], type),
+	}), {})
+}
 
+const hash = (domain, message) =>
+{
+	return ethers.utils.hexlify(sigUtil.TypedDataUtils.sign({
+		types: TYPES,
+		primaryType: TYPENAMES[type(message)],
+		message,
+		domain,
+	}))
+}
 
-module.exports.type = type
-module.exports.hash = hash
+module.exports.type  = type
+module.exports.clean = clean
+module.exports.hash  = hash
