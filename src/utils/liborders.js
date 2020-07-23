@@ -92,14 +92,14 @@ const format = (value, type) =>
 	return ethers.BigNumber.isBigNumber(value) ? value.toString() : value
 }
 
-const clean = (order) =>
+const clean = (struct, withSign) =>
 {
 	return [
-		...TYPES[type(order)],
-		{ name: 'sign', type: 'bytes' },
-	].reduce((acc, { name, type }) => ({
+		...TYPES[type(struct)],
+		withSign && { name: 'sign', type: 'bytes' },
+	].filter(Boolean).reduce((acc, { name, type }) => ({
 		...acc,
-		[name]: format(order[name], type),
+		[name]: format(struct[name], type),
 	}), {})
 }
 
