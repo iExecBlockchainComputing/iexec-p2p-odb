@@ -24,7 +24,8 @@ class IexecODBP2P extends PocoInterface
 		const domain = liborders.clean(await contract.domain(), false) // withSign: false
 		const order  = liborders.clean(dirtyOrder, true) // withSign: true
 		const hash   = liborders.hash(domain, order)
-		/* await */ this.datastore.db.put({ hash, domain, order })
+		const type   = liborders.type(order)
+		/* await */ this.datastore.db.put({ hash, type, domain, order })
 	}
 
 	async handleClose(contract, hash)

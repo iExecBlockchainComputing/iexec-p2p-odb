@@ -15,21 +15,49 @@ async function main()
 	app.use(bodyParser.json())
 	app.use(bodyParser.urlencoded({ extended: true }))
 
-	app.route('/order/:hash?')
-	.get(async (req, res) => {
-		const result = instance.datastore.db.get(req.params.hash)
-		result
-			? res.json({ result })
-			: res.json({ error: 'no entry found' })
-	})
+	// → post endpoint
+	app.route('/post')
 	.post(async (req, res) => {
 		try
 		{
 			const domain = liborders.clean(req.body.domain, false) // withSign: false
 			const order  = liborders.clean(req.body.order, true) // withSign: true
 			const hash   = liborders.hash(domain, order)
-			await instance.datastore.db.put({ hash, domain, order })
+			const type   = liborders.type(order)
+			await instance.datastore.db.put({ hash, type, domain, order })
 			res.json({ result: true })
+		}
+		catch (error)
+		{
+			res.json({ error: error.message })
+		}
+	})
+
+	// → get by hash
+	app.route('/hash/:hash')
+	.get(async (req, res) => {
+		try
+		{
+			res.json({ result: instance.datastore.db.get(req.params.hash) })
+		}
+		catch (error)
+		{
+			res.json({ error: error.message })
+		}
+	})
+
+	// → search
+	app.route('/search/:chainId/:type')
+	.get(async (req, res) => {
+		try
+		{
+			res.json({
+				result: instance.datastore.db.query((entry => [
+					entry.domain.chainId == req.params.chainId,                                     // check chainid
+					entry.type           == req.params.type,                                        // check order type
+					...Object.entries(req.query).map(([ key, value ]) => entry.order[key] == value) // check search parameters
+				].every(Boolean)))
+			})
 		}
 		catch (error)
 		{
