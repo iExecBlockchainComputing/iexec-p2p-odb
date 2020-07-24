@@ -8,7 +8,11 @@ services:
     ports:
       - 8000:8000
     environment:
-      PORT: 8000
-      DEBUG: iexec-odb-p2p:*
+      PORT:   8000
+      LISTEN: 1
+      DEBUG:  iexec-p2p-odb:*
+      DATA:   /iexec-p2p-odb-data
+    volumes:
+      - ~/.iexec-p2p-odb-data:/iexec-p2p-odb-data
 
 

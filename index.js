@@ -11,8 +11,8 @@ async function main()
 	const instance = await IexecODBP2P.create({
 		listen: process.env.LISTEN,
 		datastore: {
-			ipfsDir:    process.env.REPO ? `${process.env.REPO}/ipfs`    : undefined,
-			orbitdbDir: process.env.REPO ? `${process.env.REPO}/orbitdb` : undefined,
+			ipfsDir:    process.env.DATA ? `${process.env.DATA}/ipfs`    : undefined,
+			orbitdbDir: process.env.DATA ? `${process.env.DATA}/orbitdb` : undefined,
 		}
 	})
 
