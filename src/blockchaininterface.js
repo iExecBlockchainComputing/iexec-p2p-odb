@@ -7,7 +7,7 @@ class BlockchainInterface
 {
 	constructor(abi, chains = [])
 	{
-		this.contracts = chains.reduce((acc, { provider, address }) => ({ [provider._network.chainId]: new ethers.Contract(address, abi, provider), ...acc }), {})
+		this.contracts = chains.reduce((acc, { provider, address }) => ({ [[ provider._network.chainId, address.toLowerCase() ]]: new ethers.Contract(address, abi, provider), ...acc }), {})
 		this.debug     = withDebug(this)
 	}
 

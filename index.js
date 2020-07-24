@@ -34,11 +34,11 @@ async function main()
 	})
 
 	// → get by hash
-	app.route('/hash/:hash')
+	app.route('/hash/:hash?')
 	.get(async (req, res) => {
 		try
 		{
-			res.json({ result: instance.datastore.db.get(req.params.hash) })
+			res.json({ result: instance.datastore.db.get(req.params.hash || '') })
 		}
 		catch (error)
 		{

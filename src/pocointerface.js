@@ -62,7 +62,8 @@ class PocoInterface extends BlockchainInterface
 	async isValidOrder(domain, order)
 	{
 		this.debug(`isValidOrder`)
-		return (domain.chainId in this.contracts) && (await this.contracts[domain.chainId].viewConsumed(liborders.hash(domain, order))).lt(order.volume)
+		const contract = this.contracts[[ domain.chainId, domain.verifyingContract.toLowerCase() ]]
+		return contract && (await contract.viewConsumed(liborders.hash(domain, order))).lt(order.volume)
 	}
 }
 
