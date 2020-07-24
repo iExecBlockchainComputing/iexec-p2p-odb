@@ -29,9 +29,15 @@ class Datastore
 	async start()
 	{
 		this.debug(`start`)
-		const ipfs    = await IPFS.create(defaultsDeep({ repo: this.options.ipfsDir }, CONFIG.ipfs))
+
+		this.debug(`ipfs repo: ${this.options.ipfsDir}`)
+		const ipfs = await IPFS.create(defaultsDeep({ repo: this.options.ipfsDir }, CONFIG.ipfs))
+
+		this.debug(`orbitdb repo: ${this.options.orbitdbDir}`)
 		const orbitdb = await OrbitDB.createInstance(ipfs, { directory: this.options.orbitdbDir })
-		this.db       = await orbitdb.docs(this.options.dbname, CONFIG.orbitdb.db)
+
+		this.debug(`orbitdb db name: ${this.options.dbname}`)
+		this.db = await orbitdb.docs(this.options.dbname, CONFIG.orbitdb.db)
 
 		this.debug(`${ipfs.libp2p.peerId.toB58String()} listening on addresses:`)
 		this.debug(ipfs.libp2p.multiaddrs.map(addr => addr.toString()).join('\n'), '\n')

@@ -14,6 +14,12 @@ class BlockchainInterface
 	async startListener(callbacks = [])
 	{
 		this.debug(`startListener`)
+
+		this.debug(`contracts:`)
+		Object.keys(this.contracts).forEach(key => this.debug(` - ${key}`))
+		this.debug(`events:`)
+		callbacks.forEach(({ event }) => this.debug(` - ${event}`))
+
 		await Promise.all(
 			Object.values(this.contracts).map(contract =>
 				Promise.all(

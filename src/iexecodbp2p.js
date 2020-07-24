@@ -13,7 +13,7 @@ class IexecODBP2P extends PocoInterface
 
 	async start()
 	{
-		this.datastore = await Datastore.create()
+		this.datastore = await Datastore.create(this.options.datastore)
 		await super.start()
 		return this
 	}

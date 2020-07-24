@@ -8,7 +8,13 @@ const liborders   = require('./src/utils/liborders')
 async function main()
 {
 	// IexecODBP2P
-	const instance = await IexecODBP2P.create({ listen: process.env.LISTEN })
+	const instance = await IexecODBP2P.create({
+		listen: process.env.LISTEN,
+		datastore: {
+			ipfsDir:    process.env.REPO ? `${process.env.REPO}/ipfs`    : undefined,
+			orbitdbDir: process.env.REPO ? `${process.env.REPO}/orbitdb` : undefined,
+		}
+	})
 
 	// Rest API
 	const app = express()
