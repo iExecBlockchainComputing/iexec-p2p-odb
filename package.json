@@ -6,8 +6,8 @@
 	"license": "MIT",
 	"main": "index.js",
 	"scripts": {
-		"start:basic": "DEBUG=iexec-p2p-odb:* node index.js",
-		"start:listen": "DEBUG=iexec-p2p-odb:* LISTEN=1 node index.js"
+		"start:basic": "node index.js",
+		"start:listen": "LISTEN=1 node index.js"
 	},
 	"repository": {
 		"type": "git",

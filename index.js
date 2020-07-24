@@ -71,7 +71,7 @@ async function main()
 	process.stdin.on('data', () => {
 		const orders = instance.datastore.db.query((entry) => true)
 		console.log(`${orders.length} orders stored`)
-		orders.forEach(({ hash }) => console.log(`- ${hash} - `))
+		orders.forEach(({ hash }) => console.log(`- ${hash}`))
 	})
 }
 
