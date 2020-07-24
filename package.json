@@ -18,6 +18,7 @@
 	},
 	"dependencies": {
 		"@iexec/poco": "^5.1.2",
+		"defaults-deep": "^0.2.4",
 		"eth-sig-util": "^2.5.3",
 		"ethers": "^5.0.7",
 		"express": "^4.17.1",

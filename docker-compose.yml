@@ -1,0 +1,14 @@
+version: '3'
+services:
+  iexec-odb-p2p:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    environment:
+      PORT: 8000
+      DEBUG: iexec-odb-p2p:*
+
+

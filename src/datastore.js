@@ -2,7 +2,7 @@
 
 const IPFS         = require('ipfs')
 const OrbitDB      = require('orbit-db')
-const defaultsDeep = require('@nodeutils/defaults-deep')
+const defaultsDeep = require('defaults-deep')
 const withDebug    = require('./utils/withDebug')
 const CONFIG       = require('./config/config.json')
 
