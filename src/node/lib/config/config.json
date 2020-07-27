@@ -1,5 +1,9 @@
 {
 	"ipfs": {
+		"start": true,
+		"preload": {
+			"enabled": false
+		},
 		"config": {
 			"Addresses": {
 				"Swarm": [

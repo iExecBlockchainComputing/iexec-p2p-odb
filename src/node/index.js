@@ -2,8 +2,8 @@
 
 const express     = require('express')
 const bodyParser  = require('body-parser')
-const IexecODBP2P = require('./src/iexecodbp2p')
-const liborders   = require('./src/utils/liborders')
+const IexecODBP2P = require('./lib/iexecodbp2p')
+const liborders   = require('./lib/utils/liborders')
 
 async function main()
 {
@@ -11,6 +11,7 @@ async function main()
 	const instance = await IexecODBP2P.create({
 		listen: process.env.LISTEN,
 		datastore: {
+			dbname:     `odb/5.0.0/p2p`,
 			ipfsDir:    process.env.DATA ? `${process.env.DATA}/ipfs`    : undefined,
 			orbitdbDir: process.env.DATA ? `${process.env.DATA}/orbitdb` : undefined,
 		}

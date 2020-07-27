@@ -13,7 +13,6 @@ class Datastore
 		this.options = defaultsDeep(
 			options,
 			{
-				dbname:     `odb/5.0.0/p2p`,
 				ipfsDir:    `/tmp/odb-5.0.0-p2p/${process.pid}/ipfs`,
 				orbitdbDir: `/tmp/odb-5.0.0-p2p/${process.pid}/orbitdb`,
 			}

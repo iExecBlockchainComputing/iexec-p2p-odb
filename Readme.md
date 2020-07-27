@@ -18,7 +18,7 @@ Quickstart
 To start a minimal iExecODBP2P node, you should:
 
 1. Install all the dependencies: `npm install` or `yarn install`
-2. Start the node: `npm run start:basic` or `yarn start:basic` or `node index.js`
+2. Start the node: `npm run start` or `yarn start` or `node src/node/index.js`
 
 Additional (independant) features can be enabled using envvars:
 
