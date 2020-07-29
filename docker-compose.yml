@@ -10,6 +10,7 @@ services:
     environment:
       PORT:   8000
       LISTEN: 1
+      LOG:    trace
       DEBUG:  iexec-p2p-odb:*
       DATA:   /iexec-p2p-odb-data
     volumes:

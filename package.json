@@ -4,7 +4,7 @@
 	"description": "A libp2p based order sharing network for iExec",
 	"author": "Hadrien Croubois <hc@iex.ec>",
 	"license": "MIT",
-	"main": "src/index.js",
+	"main": "src/node/index.js",
 	"scripts": {
 		"start": "node src/node/index.js",
 		"start:listen": "LISTEN=1 node src/index.js"

@@ -10,7 +10,7 @@ const isValidStruct = (value, list) =>
 {
 	try
 	{
-		return list.indexOf(liborders.type(JSON.parse(value))) != -1
+		return list.indexOf(liborders.type(JSON.parse(value))) !== -1
 	}
 	catch
 	{
