@@ -1,5 +1,6 @@
 'use strict'
 
+const createLibp2p = require('./utils/createLibp2p')
 const IPFS         = require('ipfs')
 const OrbitDB      = require('orbit-db')
 const defaultsDeep = require('defaults-deep')
@@ -13,8 +14,8 @@ class Datastore
 		this.options = defaultsDeep(
 			options,
 			{
-				ipfsDir:    `/tmp/odb-5.0.0-p2p/${process.pid}/ipfs`,
-				orbitdbDir: `/tmp/odb-5.0.0-p2p/${process.pid}/orbitdb`,
+				ipfs:    { repo:      `/tmp/odb-5.0.0-p2p/${process.pid}/ipfs`  },
+				orbitdb: { directory: `/tmp/odb-5.0.0-p2p/${process.pid}/orbitdb` },
 			}
 		)
 		this.debug = withDebug(this)
@@ -29,11 +30,11 @@ class Datastore
 	{
 		this.debug(`start`)
 
-		this.debug(`ipfs repo: ${this.options.ipfsDir}`)
-		const ipfs = await IPFS.create(defaultsDeep({ repo: this.options.ipfsDir }, CONFIG.ipfs))
+		this.debug(`ipfs repo: ${this.options.ipfs.repo}`)
+		const ipfs = await IPFS.create(defaultsDeep({ repo: this.options.ipfs.repo, libp2p: (opts) => createLibp2p(CONFIG.libp2p, opts) }), CONFIG.ipfs)
 
-		this.debug(`orbitdb repo: ${this.options.orbitdbDir}`)
-		const orbitdb = await OrbitDB.createInstance(ipfs, { directory: this.options.orbitdbDir })
+		this.debug(`orbitdb repo: ${this.options.orbitdb.directory}`)
+		const orbitdb = await OrbitDB.createInstance(ipfs, defaultsDeep(this.options.orbitdb, CONFIG.orbitdb.core))
 
 		this.debug(`orbitdb db name: ${this.options.dbname}`)
 		this.db = await orbitdb.docs(this.options.dbname, CONFIG.orbitdb.db)
