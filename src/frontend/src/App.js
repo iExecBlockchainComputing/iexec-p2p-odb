@@ -1,67 +1,84 @@
-import React   from 'react';
-import IPFS    from 'ipfs';
-import OrbitDB from 'orbit-db';
-
-// import Libp2p from 'libp2p'
-// import Websockets from 'libp2p-websockets'
-// import WebRTCStar from 'libp2p-webrtc-star'
-// import { NOISE } from 'libp2p-noise'
-// import Secio from 'libp2p-secio'
-// import Mplex from 'libp2p-mplex'
-// import Boostrap from 'libp2p-bootstrap'
+import React            from 'react';
+import IPFS             from 'ipfs';
+import OrbitDB          from 'orbit-db';
+import Container        from '@material-ui/core/Container';
+import createLibp2p     from './hooks/createLibp2p'
+import useTimer         from './hooks/useTimer'
+import Loading          from './components/Loading';
+import CollapsableAlert from './components/CollapsableAlert';
+import OrderList        from './components/OrderList';
 
 const App = (props) =>
 {
-	// const [ libp2p,   setLibp2p  ] = React.useState(null);
-	const [ orbitdb,  setOrbitdb  ] = React.useState(null);
-	const [ database, setDatabase ] = React.useState(null);
+	const [ ipfs,     setIpfs    ] = React.useState(null)
+	const [ orbitdb,  setOrbitdb ] = React.useState(null);
+	const [ db,       setDB      ] = React.useState(null);
+	const [ data,     setData    ] = React.useState([]);
+	const { start, stop, duration } = useTimer();
 
 	React.useEffect(() => {
-		IPFS.create({
-			start: true,
-			preload: {
-				enabled: false
-			},
-			config: {
-				Addresses: {
-					Swarm: [
-						'/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
-						'/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star'
-						// '/ip4/127.0.0.1/tcp/13579/wss/p2p-webrtc-star'
-					]
-				}
-			},
-			Boostrap: [
-				'/dns4/ams-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLer265NRgSp2LA3dPaeykiS1J6DifTC88f5uVQKNAd',
-				'/dns4/lon-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLMeWqB7YGVLJN3pNLQpmmEk35v6wYtsMGLzSr5QBU3',
-				'/dns4/sfo-3.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLPppuBtQSGwKDZT2M73ULpjvfd3aZ6ha4oFGL1KrGM',
-				'/dns4/sgp-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLSafTMBsPKadTEgaXctDQVcqN88CNLHXMkTNwMKPnu',
-				'/dns4/nyc-1.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLueR4xBeUbY9WZ9xGUUxunbKWcrNFTDAadQJmocnWm',
-				'/dns4/nyc-2.bootstrap.libp2p.io/tcp/443/wss/p2p/QmSoLV4Bbm51jM9C4gDYZQ9Cy3U6aXMJDAbzgu2fzaDs64'
-			],
-			EXPERIMENTAL: {
-				pubsub: true
-			}
-		}).then(ipfs =>OrbitDB.createInstance(ipfs).then(setOrbitdb))
+		start()
+		IPFS.create({ libp2p: createLibp2p }).then(setIpfs)
 	}, []);
 
+	React.useEffect(() => {
+		if (ipfs)
+		{
+			console.info(`${ipfs.libp2p.peerId.toB58String()} listening on addresses:`)
+			console.info(ipfs.libp2p.multiaddrs.map(addr => addr.toString()).join('\n'), '\n')
+			ipfs.libp2p.connectionManager.on('peer:connect',    ({ remotePeer }) => console.info(`[peer:connect] connected to ${remotePeer.toB58String()}`))
+			ipfs.libp2p.connectionManager.on('peer:disconnect', ({ remotePeer }) => console.info(`[peer:disconnect] disconnected from ${remotePeer.toB58String()}`))
+			OrbitDB.createInstance(ipfs).then(setOrbitdb)
+		}
+	}, [ ipfs ])
 
 	React.useEffect(() => {
-		orbitdb && orbitdb.open('odb/5.0.0/p2p', {
-			create: true,
-			overwrite: false,
-			localOnly: false,
-			type: 'docstore',
-			indexBy: 'hash',
-			accessController: { write: ['*'] },
-		}).then(setDatabase)
+		if (orbitdb)
+		{
+			orbitdb.open('odb/5.0.0/p2p', {
+				create: true,
+				overwrite: false,
+				localOnly: false,
+				type: 'docstore',
+				indexBy: 'hash',
+				accessController: { write: ['*'] },
+			}).then(setDB)
+		}
 	}, [ orbitdb ])
 
 	React.useEffect(() => {
-		database && console.log(Object.keys(database))
-	}, [ database ])
+		const interval = setInterval(() => db && setData(db.get('')), 1000)
+		return () => clearInterval(interval)
+	}, [ db ]);
 
-	return null;
+	React.useEffect(() => {
+		data.length && stop()
+	}, [ data ])
+
+	return (
+		<>
+			{
+				Boolean(!db) &&
+				<Loading message='Connecting ...'/>
+			}
+			{
+				Boolean(db && !data.length) &&
+				<Loading message='Fetching data from network...'/>
+			}
+			{
+				Boolean(db && data.length) &&
+				<>
+					<CollapsableAlert title='Connection to iExecODBP2P established' text={`Data loaded in ${ duration / 1000 } secondes`}/>
+					<Container>
+						<OrderList
+							entries = { data }
+							delete  = { ({ hash }) => db.del(hash) }
+						/>
+					</Container>
+				</>
+			}
+		</>
+	);
 }
 
 export default App;
