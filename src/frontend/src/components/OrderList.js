@@ -5,9 +5,8 @@ import ListItemIcon            from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText            from '@material-ui/core/ListItemText';
 import IconButton              from '@material-ui/core/IconButton';
-import DeleteIcon              from '@material-ui/icons/Delete';
 import ReceiptIcon             from '@material-ui/icons/Receipt';
-
+import FileCopyIcon            from '@material-ui/icons/FileCopy';
 
 export default (props) =>
 	<List dense>
@@ -19,11 +18,11 @@ export default (props) =>
 					</ListItemIcon>
 					<ListItemText
 						primary   = { <><strong>[{entry.type}]</strong> {entry.hash}</> }
-						secondary = { <pre>{ JSON.stringify(entry) }</pre> }
+						secondary = { JSON.stringify(entry) }
 					/>
 					<ListItemSecondaryAction>
-						<IconButton edge='end' aria-label='delete' onClick={ () => props.delete(entry) }>
-							<DeleteIcon/>
+						<IconButton edge='end' aria-label='copy-to-clipboard' onClick={ () => navigator.clipboard.writeText(JSON.stringify(entry)) }>
+							<FileCopyIcon/>
 						</IconButton>
 					</ListItemSecondaryAction>
 				</ListItem>

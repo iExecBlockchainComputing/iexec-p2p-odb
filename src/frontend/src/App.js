@@ -1,23 +1,35 @@
 import React            from 'react';
 import IPFS             from 'ipfs';
 import OrbitDB          from 'orbit-db';
-import Container        from '@material-ui/core/Container';
+
+import Container        from 'react-bootstrap/Container';
+import AddToPhotosIcon  from '@material-ui/icons/AddToPhotos';
+
 import createLibp2p     from './hooks/createLibp2p'
 import useTimer         from './hooks/useTimer'
+import useView          from './hooks/useView';
+
+import liborders        from './utils/liborders';
+
 import Loading          from './components/Loading';
+import UploadModal      from './components/UploadModal';
 import CollapsableAlert from './components/CollapsableAlert';
 import OrderList        from './components/OrderList';
+import SpeedDials       from './components/SpeedDials';
+
+
 
 const App = (props) =>
 {
-	const [ ipfs,     setIpfs    ] = React.useState(null)
-	const [ orbitdb,  setOrbitdb ] = React.useState(null);
-	const [ db,       setDB      ] = React.useState(null);
-	const [ data,     setData    ] = React.useState([]);
-	const { start, stop, duration } = useTimer();
+	const [ ipfs,    setIpfs    ] = React.useState(null);
+	const [ orbitdb, setOrbitdb ] = React.useState(null);
+	const [ db,      setDB      ] = React.useState(null);
+	const [ data,    setData    ] = React.useState([]);
+	const timer      = useTimer();
+	const viewUpload = useView();
 
 	React.useEffect(() => {
-		start()
+		timer.start()
 		IPFS.create({ libp2p: createLibp2p }).then(setIpfs)
 	}, []);
 
@@ -52,11 +64,26 @@ const App = (props) =>
 	}, [ db ]);
 
 	React.useEffect(() => {
-		data.length && stop()
+		data.length && timer.stop()
 	}, [ data ])
+
+	const handleSubmit = ({ domain, order }) => {
+		domain     = liborders.clean(JSON.parse(domain), false) // withSign: false
+		order      = liborders.clean(JSON.parse(order), true) // withSign: true
+		db && db.put({
+			hash: liborders.hash(domain, order),
+			type: liborders.type(order),
+			domain,
+			order,
+		}).then(viewUpload.hide)
+	}
 
 	return (
 		<>
+			<UploadModal
+				view   = { viewUpload }
+				submit = { handleSubmit }
+			/>
 			{
 				Boolean(!db) &&
 				<Loading message='Connecting ...'/>
@@ -68,13 +95,22 @@ const App = (props) =>
 			{
 				Boolean(db && data.length) &&
 				<>
-					<CollapsableAlert title='Connection to iExecODBP2P established' text={`Data loaded in ${ duration / 1000 } secondes`}/>
+					<CollapsableAlert variant='success'>
+						<strong>Connection to iExecODBP2P established.</strong> Data loaded in { timer.duration / 1000 } secondes
+					</CollapsableAlert>
+
 					<Container>
-						<OrderList
-							entries = { data }
-							delete  = { ({ hash }) => db.del(hash) }
-						/>
+						<OrderList entries = { data }/>
 					</Container>
+					<SpeedDials
+						actions={[
+							{ icon: <AddToPhotosIcon/>, name: 'Upload', fun: () => viewUpload.show() },
+							// { icon: <SaveIcon />,     name: 'Save' },
+							// { icon: <PrintIcon />,    name: 'Print' },
+							// { icon: <ShareIcon />,    name: 'Share' },
+							// { icon: <FavoriteIcon />, name: 'Like' },
+						]}
+					/>
 				</>
 			}
 		</>
