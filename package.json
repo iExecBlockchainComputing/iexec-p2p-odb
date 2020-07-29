@@ -4,10 +4,10 @@
 	"description": "A libp2p based order sharing network for iExec",
 	"author": "Hadrien Croubois <hc@iex.ec>",
 	"license": "MIT",
-	"main": "index.js",
+	"main": "src/index.js",
 	"scripts": {
-		"start:basic": "node index.js",
-		"start:listen": "LISTEN=1 node index.js"
+		"start": "node src/node/index.js",
+		"start:listen": "LISTEN=1 node src/index.js"
 	},
 	"repository": {
 		"type": "git",
@@ -24,6 +24,7 @@
 		"express": "^4.17.1",
 		"ipfs": "^0.48.1",
 		"orbit-db": "^0.24.2",
-		"secp256k1": "^3.8.0"
+		"secp256k1": "^3.8.0",
+		"wrtc": "^0.4.6"
 	}
 }
