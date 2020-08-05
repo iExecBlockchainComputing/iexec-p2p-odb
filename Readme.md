@@ -4,13 +4,13 @@ iExecODBP2P
 Introduction
 ---
 
-The iExecODB (iExec Open Decentralised brokering), introduced in V3, is the base of the iExec marketplace. It was designed has an hybrid onchain/offchain protocole, offering both the security and decentralisation of the blockchain, and the low cost of offchain communications and storage. This protocole, designed in july 2018, and live since may 2019 includes many features, some of them still not being fully utilised by the iExec stack.
+The iExecODB (iExec Open Decentralised brokering), introduced in V3, is the base of the iExec marketplace. It was designed as a hybrid on-chain/off-chain protocols, offering both the security and decentralisation of the blockchain, and the low cost of off-chain communications and storage. This protocol, designed in July 2018, and live since May 2019 includes many features, some of them still not being fully utilised by the iExec stack.
 
-Despite the protocole being decentralised in its design, the current implementation still relies on centralised entities such as the iExec order store. This is a service, provided by iExec, for user to share their, and query other people's, orders. It is accessible directly form the [iExec markerplace](https://market.iex.ec) or through the [iExec SDK](http://github.com/iExecBlockchainComputing/sdk).
+Despite the protocol being decentralised in its design, the current implementation still relies on centralised entities such as the iExec order store. This is a service, provided by iExec, for users to share their, and query other people's, orders. It is accessible directly from the [iExec marketplace](https://market.iex.ec) or through the [iExec SDK](http://github.com/iExecBlockchainComputing/sdk).
 
-The objective of iExecODBP2P is to propose an decentralised alternative to the iExec order store.
+The objective of iExecODBP2P is to propose a decentralised alternative to the iExec order store.
 
-iExecODBP2P is a an P2P network of nodes that stores and keep track of iExec ODB orders. This includes broacasting new orders, searching existing orders, and keeping track of old, invalid, orders.
+iExecODBP2P is a P2P network of nodes that stores and keep track of iExec ODB orders. This includes broadcasting new orders, searching existing orders, and keeping track of old, invalid, orders.
 
 Quickstart
 ---

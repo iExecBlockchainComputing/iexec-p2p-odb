@@ -113,10 +113,6 @@ const hash = (domain, message) =>
 	}))
 }
 
-module.exports.type  = type
-module.exports.clean = clean
-module.exports.hash  = hash
-
 export default {
 	type,
 	clean,
